@@ -1,13 +1,8 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-
 namespace BookShelf.Domain.Books
 {
     public class EBook : Book
     {
-        EBookFormat Format { get; }
+        public EBookFormat Format { get; }
         public decimal FileSizeMb { get; }
 
         public EBook(string title, string author, int year, string format, decimal size)

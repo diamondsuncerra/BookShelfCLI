@@ -1,8 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-
 namespace BookShelf.Domain.Books
 {
     public abstract class Book
@@ -22,6 +17,7 @@ namespace BookShelf.Domain.Books
             AddedAt = DateTimeOffset.UtcNow;
         }
 
+        // E ok validarea aici?
         private static int ValidateYear(int year)
         {
             int currentLimit = DateTimeOffset.UtcNow.Year + 1;
