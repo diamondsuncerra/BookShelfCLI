@@ -2,15 +2,14 @@ namespace BookShelf.Domain.Books
 {
     public class PhysicalBook : Book
     {
-        public int Pages { get; }
         public string Isbn13 { get; }
-        public PhysicalBook(int pages, string isbn13, string title, string author, int year) : base(title, author, year)
+        public int Pages { get; }
+        public PhysicalBook(string title, string author, int year, string isbn13, int pages) : base(title, author, year)
         {
-            Pages = ValidatePages(pages);
             Isbn13 = ValidateIsbn13(isbn13);
+            Pages = ValidatePages(pages);
         }
 
-        // constructor validation required not fluid.
         private static string ValidateIsbn13(string isbn13)
         {
             if (string.IsNullOrWhiteSpace(isbn13)) throw new ArgumentException("ISBN13 cannot be empty.");
