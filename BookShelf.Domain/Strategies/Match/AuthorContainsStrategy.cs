@@ -13,7 +13,11 @@ namespace BookShelf.Domain.Strategies.Match
             ArgumentException.ThrowIfNullOrEmpty(term);
             ArgumentNullException.ThrowIfNull(book);
             ArgumentException.ThrowIfNullOrEmpty(book.Author);
-            return book.Author.Contains(term);
+            var normalizedTerm = term.Trim();
+            if (normalizedTerm.Length == 0)
+                return false;
+
+            return book.Author.Contains(normalizedTerm, StringComparison.OrdinalIgnoreCase);
         }
     }
 }
