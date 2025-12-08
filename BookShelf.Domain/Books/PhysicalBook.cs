@@ -1,14 +1,9 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-
 namespace BookShelf.Domain.Books
 {
     public class PhysicalBook : Book
     {
-        int Pages { get; }
-        string Isbn13 { get; }
+        public int Pages { get; }
+        public string Isbn13 { get; }
         public PhysicalBook(int pages, string isbn13, string title, string author, int year) : base(title, author, year)
         {
             Pages = ValidatePages(pages);
