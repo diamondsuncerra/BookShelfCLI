@@ -18,9 +18,11 @@ namespace BookShelf.Domain.Books
             Title = ValidateText(title);
             Author = ValidateText(author);
             Year = ValidateYear(year);
+            Id = Guid.NewGuid();
+            AddedAt = DateTimeOffset.UtcNow;
         }
 
-        private int ValidateYear(int year)
+        private static int ValidateYear(int year)
         {
             int currentLimit = DateTimeOffset.UtcNow.Year + 1;
             if (year < 1450 || year > currentLimit)
