@@ -1,0 +1,65 @@
+#############
+# .NET BUILD
+#############
+bin/
+obj/
+out/
+TestResults/
+
+#############
+# VS CODE
+#############
+.vscode/
+*.code-workspace
+
+#############
+# OS FILES
+#############
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Linux
+*~
+
+#############
+# DOTNET / NUGET
+#############
+*.nupkg
+*.snupkg
+packages/
+*.nuget.props
+*.nuget.targets
+
+#############
+# LOGS & TEMP
+#############
+*.log
+*.tmp
+*.temp
+
+#############
+# SECRETS / ENV
+#############
+.env
+.env.*
+
+#############
+# IDE CACHES (Cross-platform safe)
+#############
+.idea/
+*.sln.iml
+
+#############
+# COVERAGE (if you use coverage tools)
+#############
+coverage/
+*.coverage
+*.coveragexml
