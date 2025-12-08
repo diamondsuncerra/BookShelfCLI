@@ -1,7 +1,7 @@
 using System.Linq;
 using BookShelf.Domain.Books;
 
-namespace BookShelf.Domain.Strategies
+namespace BookShelf.Domain.Strategies.Sort
 {
     public class SortByAuthorStrategy : ISortStrategy
     {
