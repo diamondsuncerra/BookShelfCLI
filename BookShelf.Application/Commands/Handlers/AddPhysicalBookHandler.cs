@@ -2,16 +2,14 @@ using BookShelf.Application.Commands.Models;
 
 namespace BookShelf.Application.Commands.Handlers
 {
-    public class AddPhysicalBookHandler : ICommandHandler<AddPhysicalBookCommand, CommandResult<Guid>>
+    public class AddPhysicalBookHandler(IBookService bookService) : ICommandHandler<AddPhysicalBookCommand, CommandResult<Guid>>
     {
-        private readonly IBookService _bookService;
-        public AddPhysicalBookHandler(IBookService bookService)
-        {
-            _bookService = bookService;
-        }
+        private readonly IBookService _bookService = bookService;
+
         public CommandResult<Guid> Handle(AddPhysicalBookCommand command)
         {
-            Guid id = _bookService.AddPhysical(
+            Guid id = _bookService.AddPhysical( 
+                // to avoid coupling bookservice to the commands
                 command.Title,
                 command.Author,
                 command.Year,

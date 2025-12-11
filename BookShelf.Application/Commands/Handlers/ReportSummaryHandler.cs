@@ -1,7 +1,8 @@
 namespace BookShelf.Application.Commands.Handlers
 {
-    public class ReportSummaryHandler
+    public class ReportSummaryHandler(IBookService bookService)
     {
         
+        private readonly IBookService _bookService = bookService;
     }
 }
