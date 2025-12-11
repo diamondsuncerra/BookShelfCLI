@@ -1,3 +1,4 @@
+using BookShelf.Application.Commands.Enums;
 using BookShelf.Domain.Books;
 namespace BookShelf.Application
 {
@@ -11,5 +12,6 @@ namespace BookShelf.Application
         string BuildSummaryReport();
         string BuildCatalogReport();
         Guid AddEBook(string title, string author, int year, string fileFormat, decimal fileSizeMb);
+        IReadOnlyList<Book> Find(FindField field, string term);
     }
 }
