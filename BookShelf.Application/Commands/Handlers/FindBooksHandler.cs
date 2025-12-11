@@ -9,7 +9,6 @@ namespace BookShelf.Application.Commands.Handlers
 
         public CommandResult<IReadOnlyList<Book>> Handle(FindBooksCommand command)
         {
-
             return CommandResult<IReadOnlyList<Book>>.Ok(_bookService.Find(command.Field, command.Term), "Found books.");
         }
 
