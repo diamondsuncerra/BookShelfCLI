@@ -7,7 +7,7 @@ namespace BookShelf.Application
         Guid AddPhysical(string title, string author, int year, string isbn13, int pages);
         IReadOnlyList<Book> List();
         IReadOnlyList<Book> Find();
-        IReadOnlyList<Book> Sort();
+        IReadOnlyList<Book> Sort(SortField strategy);
         bool Remove(Guid id);
         string BuildSummaryReport();
         string BuildCatalogReport();

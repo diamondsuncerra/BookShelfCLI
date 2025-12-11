@@ -2,11 +2,11 @@ using BookShelf.Application.Commands.Models;
 
 namespace BookShelf.Application.Commands.Handlers
 {
-    public class AddEBookHandler(IBookService bookService) : ICommandHandler<AddEBookCommand, CommandResult<Guid>>
+    public class AddEBookHandler(IBookService bookService) : ICommandHandler<AddEBookCommand, Result<Guid>>
     {
         private readonly IBookService _bookService = bookService;
 
-        public CommandResult<Guid> Handle(AddEBookCommand command)
+        public Result<Guid> Handle(AddEBookCommand command)
         {
             Guid id = _bookService.AddEBook(
                         command.Title,
@@ -14,7 +14,7 @@ namespace BookShelf.Application.Commands.Handlers
                         command.Year,
                         command.FileFormat,
                         command.FileSizeMb);
-            return CommandResult<Guid>.Ok(id, "Ebook added.");
+            return Result<Guid>.Ok(id, "Ebook added.");
         }
 
     }
