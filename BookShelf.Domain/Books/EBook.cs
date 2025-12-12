@@ -25,5 +25,6 @@ namespace BookShelf.Domain.Books
 
             throw new ArgumentException("Format must be pdf, epub, or mobi.");
         }
+
     }
 }

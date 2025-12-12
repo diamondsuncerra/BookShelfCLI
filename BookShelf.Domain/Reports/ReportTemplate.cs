@@ -8,7 +8,7 @@ namespace BookShelf.Domain.Reports
         {
             ArgumentNullException.ThrowIfNull(books);
             
-            var header = TrimOrThrow(BuildHeader(books), "Header");
+            var header = TrimOrThrow(BuildHeader(), "Header");
             var body = TrimOrThrow(BuildBody(books), "Body");
             var footer = TrimOrThrow(BuildFooter(books), "Footer");
 
@@ -21,7 +21,7 @@ namespace BookShelf.Domain.Reports
 
             else return text.TrimEnd();
         }
-        protected abstract string BuildHeader(IEnumerable<Book> books);
+        protected abstract string BuildHeader();
         protected abstract string BuildBody(IEnumerable<Book> books);
         protected abstract string BuildFooter(IEnumerable<Book> books);
     }
