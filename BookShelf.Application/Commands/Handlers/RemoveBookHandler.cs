@@ -9,7 +9,7 @@ namespace BookShelf.Application.Commands.Handlers
         public Result<bool> Handle(RemoveBookCommand command)
         {
             bool result = _bookService.Remove(command.Id);
-            return Result<bool>.Ok(result, "Book removed succesfully.");
+            return Result<bool>.Ok(result, "Book removed successfully.");
             // add error handling later!
         }
     }
