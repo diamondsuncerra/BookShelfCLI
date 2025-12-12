@@ -2,13 +2,27 @@
 using BookShelf.Application.Commands;
 using BookShelf.Application.Commands.Handlers;
 using BookShelf.Application.Commands.Models;
+using BookShelf.Application.Services;
 using BookShelf.ConsoleUI.UIMessages;
+using BookShelf.Domain.Factories;
+using BookShelf.Domain.Repositories;
+using BookShelf.Infrastructure.Factory;
+using BookShelf.Infrastructure.Repository;
 
 namespace BookShelf.ConsoleUI
 {
     public class CommandRouter
     {
-        IBookService _bookService = new BookService();
+        private readonly IBookFactory _bookFactory;
+        private readonly IBookRepository _bookRepository;
+        private readonly IBookService _bookService;
+
+        public CommandRouter()
+        {
+            _bookFactory = new BookFactory();
+            _bookRepository = new InMemoryBookRepository();
+            _bookService = new BookService(_bookFactory, _bookRepository);
+        }
         public Result<object> Route(string input)
         {
             char[] delimiters = { ',', ';', '|', ' ' };
@@ -48,11 +62,11 @@ namespace BookShelf.ConsoleUI
             }
 
         }
-        private Result<object> HandleAdd(string[] tokens)
+        private Result HandleAdd(string[] tokens)
         {
             EnsureTokenLength(tokens, 7); // if this throws catch it in the Route
             var type = tokens[1];
-            if(type.Equals("ebook"))
+            if (type.Equals("ebook"))
             {
                 var title = tokens[2];
                 var author = tokens[3];
@@ -60,11 +74,14 @@ namespace BookShelf.ConsoleUI
                 var fileFormat = tokens[5];
                 int.TryParse(tokens[6], out int fileSizeMb);
                 AddEBookCommand addEBookCommand = new(title, author, year, fileFormat, fileSizeMb);
-                AddEBookCommand handler = new AddEBookHandler();
-            } else if (type.Equals("physical"))
+                AddEBookHandler handler = new(_bookService);
+                return handler.Handle(addEBookCommand);
+            }
+            else if (type.Equals("physical"))
             {
-                
-            } else throw new ArgumentException(ErrorMessages.InscorrectParameters);
+
+            }
+            else throw new ArgumentException(ErrorMessages.InscorrectParameters);
         }
 
         private Result<object> HandleReport(string[] tokens)
