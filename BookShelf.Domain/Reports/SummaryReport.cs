@@ -5,7 +5,7 @@ namespace BookShelf.Domain.Reports
 {
     public sealed class SummaryReport : ReportTemplate
     {
-        protected override string BuildHeader(IEnumerable<Book> books)
+        protected override string BuildHeader()
         {
             return "=== Summary Report ===";
         }

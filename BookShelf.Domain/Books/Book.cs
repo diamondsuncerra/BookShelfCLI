@@ -34,7 +34,9 @@ namespace BookShelf.Domain.Books
             }
             else return text.Trim();
         }
-
-
+        public string ToString()
+        {
+            return Title + " " + Author + Environment.NewLine;
+        }
     }
 }
