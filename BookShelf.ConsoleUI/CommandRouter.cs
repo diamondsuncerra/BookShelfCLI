@@ -23,7 +23,7 @@ namespace BookShelf.ConsoleUI
             _bookRepository = new InMemoryBookRepository();
             _bookService = new BookService(_bookFactory, _bookRepository);
         }
-        public Result<object> Route(string input)
+        public Result Route(string input)
         {
             char[] delimiters = { ',', ';', '|', ' ' };
             string[] tokens = input.Split(delimiters, StringSplitOptions.RemoveEmptyEntries);
@@ -70,18 +70,32 @@ namespace BookShelf.ConsoleUI
             {
                 var title = tokens[2];
                 var author = tokens[3];
-                int.TryParse(tokens[4], out int year);
                 var fileFormat = tokens[5];
-                int.TryParse(tokens[6], out int fileSizeMb);
+                if (!int.TryParse(tokens[4], out int year))
+                    return Result<object>.Fail(ErrorMessages.InvalidYear);
+                if (!int.TryParse(tokens[6], out int fileSizeMb))
+                    return Result<object>.Fail(ErrorMessages.InvalidFileSize);
+
                 AddEBookCommand addEBookCommand = new(title, author, year, fileFormat, fileSizeMb);
                 AddEBookHandler handler = new(_bookService);
                 return handler.Handle(addEBookCommand);
             }
             else if (type.Equals("physical"))
             {
+                var title = tokens[2];
+                var author = tokens[3];
+                var isbn13 = tokens[5];
+                if (!int.TryParse(tokens[4], out int year))
+                    return Result<object>.Fail(ErrorMessages.InvalidYear);
 
+                if (!int.TryParse(tokens[6], out int pages))
+                    return Result<object>.Fail(ErrorMessages.InvalidPageNumber);
+                    
+                AddPhysicalBookCommand addPhysicalBookCommand = new(title, author, year, isbn13, pages);
+                AddPhysicalBookHandler handler = new(_bookService);
+                return handler.Handle(addPhysicalBookCommand);
             }
-            else throw new ArgumentException(ErrorMessages.InscorrectParameters);
+            else throw new ArgumentException(ErrorMessages.IncorrectParameters);
         }
 
         private Result<object> HandleReport(string[] tokens)
