@@ -44,39 +44,40 @@ namespace BookShelf.ConsoleUI
 
                 return commandType switch
                 {
-                    "add" => HandleAdd(tokens),
-                    "list" => HandleList(tokens),
-                    "find" => HandleFind(tokens),
-                    "sort" => HandleSort(tokens),
+                    "add"    => HandleAdd(tokens),
+                    "list"   => HandleList(tokens),
+                    "find"   => HandleFind(tokens),
+                    "sort"   => HandleSort(tokens),
                     "remove" => HandleRemove(tokens),
                     "report" => HandleReport(tokens),
-                    "help" => Result.Ok(UIHelperMessages.AvailableCommands),
-                    "exit" => Result.Ok(UIHelperMessages.Exit),
-                    _ => Result.Fail($"Unknown command '{commandType}'. Type 'help' for usage.")
+                    "help"   => Result.Ok(UIHelperMessages.AvailableCommands),
+                    "exit"   => Result.Ok(CommandsOrFields.Exit),
+                    _        => Result.Fail($"Unknown command '{commandType}'. Type 'help' for usage.")
                 };
             }
-            catch (Exception ex)
+            catch
             {
-                return Result.Fail(ex.Message);
+                return Result.Fail(ErrorMessages.UnexpectedError);
             }
         }
 
+
         private Result HandleAdd(string[] tokens)
         {
-            EnsureTokenLength(tokens, 7);
+            if (tokens.Length < 7)
+                return Result.Fail(ErrorMessages.InsufficientParameters);
 
             var type = tokens[1];
 
             if (type.Equals(CommandsOrFields.Ebook, StringComparison.OrdinalIgnoreCase))
             {
-                var title = tokens[2];
-                var author = tokens[3];
+                var title      = tokens[2];
+                var author     = tokens[3];
                 var fileFormat = tokens[5];
 
                 if (!int.TryParse(tokens[4], out int year))
                     return Result.Fail(ErrorMessages.InvalidYear);
 
-                // decimal ≥ 0, invariant culture (spec asks for culture-safe)
                 if (!decimal.TryParse(tokens[6], NumberStyles.Number, CultureInfo.InvariantCulture, out var fileSizeMb) ||
                     fileSizeMb < 0)
                     return Result.Fail(ErrorMessages.InvalidFileSize);
@@ -89,7 +90,7 @@ namespace BookShelf.ConsoleUI
 
             if (type.Equals(CommandsOrFields.Physical, StringComparison.OrdinalIgnoreCase))
             {
-                var title = tokens[2];
+                var title  = tokens[2];
                 var author = tokens[3];
                 var isbn13 = tokens[5];
 
@@ -104,7 +105,6 @@ namespace BookShelf.ConsoleUI
 
                 return handler.Handle(command);
             }
-
             return Result.Fail(ErrorMessages.IncorrectParameters);
         }
 
@@ -113,13 +113,14 @@ namespace BookShelf.ConsoleUI
             var handler = new ListBooksHandler(_bookService);
             return handler.Handle(new ListBooksCommand());
         }
-
         private Result HandleFind(string[] tokens)
         {
-            EnsureTokenLength(tokens, 3);
+            if (tokens.Length < 3)
+                return Result.Fail(ErrorMessages.InsufficientParameters);
 
             if (!Enum.TryParse<FindField>(tokens[1], true, out var field))
                 return Result.Fail(ErrorMessages.IncorrectParameters);
+
             var searchTerm = tokens[2];
 
             if (string.IsNullOrWhiteSpace(searchTerm))
@@ -132,7 +133,8 @@ namespace BookShelf.ConsoleUI
         }
         private Result HandleSort(string[] tokens)
         {
-            EnsureTokenLength(tokens, 2);
+            if (tokens.Length < 2)
+                return Result.Fail(ErrorMessages.InsufficientParameters);
 
             if (Enum.TryParse<SortField>(tokens[1], true, out var strategy))
             {
@@ -140,13 +142,12 @@ namespace BookShelf.ConsoleUI
                 var command = new SortBooksCommand(strategy);
                 return handler.Handle(command);
             }
-
             return Result.Fail(ErrorMessages.IncorrectParameters);
         }
         private Result HandleRemove(string[] tokens)
         {
-
-            EnsureTokenLength(tokens, 2);
+            if (tokens.Length < 2)
+                return Result.Fail(ErrorMessages.InsufficientParameters);
 
             if (Guid.TryParse(tokens[1], out Guid guid))
             {
@@ -154,39 +155,34 @@ namespace BookShelf.ConsoleUI
                 var command = new RemoveBookCommand(guid);
                 return handler.Handle(command);
             }
-
             return Result.Fail(ErrorMessages.IncorrectParameters);
         }
+
         private Result HandleReport(string[] tokens)
         {
-            EnsureTokenLength(tokens, 2);
 
-            if (Enum.TryParse<ReportType>(tokens[1], true, out var reportType))
+            if (tokens.Length < 2)
+                return Result.Fail(ErrorMessages.InsufficientParameters);
+
+            if (!Enum.TryParse<ReportType>(tokens[1], true, out var reportType))
+                return Result.Fail(ErrorMessages.IncorrectParameters);
+
+            if (reportType == ReportType.Catalog)
             {
-                if (reportType.Equals(ReportType.Catalog))
-                {
-                    var handler = new ReportCatalogHandler(_bookService);
-                    return handler.Handle(new ReportCatalogCommand());
-                }
-                else
-                {
-                    var handler = new ReportSummaryHandler(_bookService);
-                    return handler.Handle(new ReportSummaryCommand());
-                }
+                var handler = new ReportCatalogHandler(_bookService);
+                return handler.Handle(new ReportCatalogCommand());
+            }
+
+            if (reportType == ReportType.Summary)
+            {
+                var handler = new ReportSummaryHandler(_bookService);
+                return handler.Handle(new ReportSummaryCommand());
             }
 
             return Result.Fail(ErrorMessages.IncorrectParameters);
         }
-
-        private static void EnsureTokenLength(string[] tokens, int expected)
-        {
-            if (tokens.Length < expected)
-                throw new Exception(ErrorMessages.InsufficientParameters);
-        }
-
         private static string[] Tokenize(string input)
         {
-            // Splits on whitespace, but keeps text inside "..." as a single token
             var tokens = new List<string>();
             var current = new StringBuilder();
             bool inQuotes = false;
@@ -196,7 +192,7 @@ namespace BookShelf.ConsoleUI
                 if (c == '"')
                 {
                     inQuotes = !inQuotes;
-                    continue;
+                    continue; 
                 }
 
                 if (char.IsWhiteSpace(c) && !inQuotes)
@@ -216,7 +212,7 @@ namespace BookShelf.ConsoleUI
             if (current.Length > 0)
                 tokens.Add(current.ToString());
 
-            return tokens.ToArray();
+            return [.. tokens];
         }
     }
 }
