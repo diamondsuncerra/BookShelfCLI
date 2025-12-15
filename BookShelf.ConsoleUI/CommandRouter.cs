@@ -5,28 +5,13 @@ using BookShelf.Application.Commands;
 using BookShelf.Application.Commands.Enums;
 using BookShelf.Application.Commands.Handlers;
 using BookShelf.Application.Commands.Models;
-using BookShelf.Application.Services;
 using BookShelf.ConsoleUI.UIMessages;
-using BookShelf.Domain.Factories;
-using BookShelf.Domain.Reports;
-using BookShelf.Domain.Repositories;
-using BookShelf.Infrastructure.Factory;
-using BookShelf.Infrastructure.Repository;
 
 namespace BookShelf.ConsoleUI
 {
-    public class CommandRouter
+    public class CommandRouter(IBookService bookService)
     {
-        private readonly IBookFactory _bookFactory;
-        private readonly IBookRepository _bookRepository;
-        private readonly IBookService _bookService;
-
-        public CommandRouter()
-        {
-            _bookFactory = new BookFactory();
-            _bookRepository = new InMemoryBookRepository();
-            _bookService = new BookService(_bookFactory, _bookRepository);
-        }
+        private readonly IBookService _bookService = bookService;
 
         public Result Route(string input)
         {
@@ -44,15 +29,15 @@ namespace BookShelf.ConsoleUI
 
                 return commandType switch
                 {
-                    "add"    => HandleAdd(tokens),
-                    "list"   => HandleList(),
-                    "find"   => HandleFind(tokens),
-                    "sort"   => HandleSort(tokens),
+                    "add" => HandleAdd(tokens),
+                    "list" => HandleList(),
+                    "find" => HandleFind(tokens),
+                    "sort" => HandleSort(tokens),
                     "remove" => HandleRemove(tokens),
                     "report" => HandleReport(tokens),
-                    "help"   => Result.Ok(UIHelperMessages.AvailableCommands),
-                    "exit"   => Result.Ok(CommandsOrFields.Exit),
-                    _        => Result.Fail($"Unknown command '{commandType}'. Type 'help' for usage.")
+                    "help" => Result.Ok(UIHelperMessages.AvailableCommands),
+                    "exit" => Result.Ok(CommandsOrFields.Exit),
+                    _ => Result.Fail($"Unknown command '{commandType}'. Type 'help' for usage.")
                 };
             }
             catch
@@ -71,8 +56,8 @@ namespace BookShelf.ConsoleUI
 
             if (type.Equals(CommandsOrFields.Ebook, StringComparison.OrdinalIgnoreCase))
             {
-                var title      = tokens[2];
-                var author     = tokens[3];
+                var title = tokens[2];
+                var author = tokens[3];
                 var fileFormat = tokens[5];
 
                 if (!int.TryParse(tokens[4], out int year))
@@ -90,7 +75,7 @@ namespace BookShelf.ConsoleUI
 
             if (type.Equals(CommandsOrFields.Physical, StringComparison.OrdinalIgnoreCase))
             {
-                var title  = tokens[2];
+                var title = tokens[2];
                 var author = tokens[3];
                 var isbn13 = tokens[5];
 
@@ -192,7 +177,7 @@ namespace BookShelf.ConsoleUI
                 if (c == '"')
                 {
                     inQuotes = !inQuotes;
-                    continue; 
+                    continue;
                 }
 
                 if (char.IsWhiteSpace(c) && !inQuotes)
