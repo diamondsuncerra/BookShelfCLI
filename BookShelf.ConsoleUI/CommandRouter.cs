@@ -1,5 +1,6 @@
 ﻿using BookShelf.Application;
 using BookShelf.Application.Commands;
+using BookShelf.Application.Commands.Enums;
 using BookShelf.Application.Commands.Handlers;
 using BookShelf.Application.Commands.Models;
 using BookShelf.Application.Services;
@@ -23,111 +24,145 @@ namespace BookShelf.ConsoleUI
             _bookRepository = new InMemoryBookRepository();
             _bookService = new BookService(_bookFactory, _bookRepository);
         }
+
         public Result Route(string input)
         {
-            char[] delimiters = { ',', ';', '|', ' ' };
-            string[] tokens = input.Split(delimiters, StringSplitOptions.RemoveEmptyEntries);
-            if (tokens is null)
-                return Result<object>.Fail("No command. Type 'help' for usage.");
-
-            var commandType = tokens[0];
-            switch (commandType)
+            try
             {
-                case "add": return HandleAdd(tokens);
+                if (string.IsNullOrWhiteSpace(input))
+                    return Result.Fail("No command. Type 'help' for usage.");
 
-                case "list":
-                    return HandleList(tokens);
+                char[] delimiters = { ',', ';', '|', ' ' }; // o sa avem probleme la "clean code"
+                string[] tokens = input.Split(delimiters, StringSplitOptions.RemoveEmptyEntries);
 
-                case "find":
-                    return HandleFind(tokens);
+                if (tokens.Length == 0)
+                    return Result.Fail("No command. Type 'help' for usage.");
 
-                case "sort":
-                    return HandleSort(tokens);
+                var commandType = tokens[0].ToLowerInvariant();
 
-                case "remove":
-                    return HandleRemove(tokens);
-
-                case "report":
-                    return HandleReport(tokens);
-
-                case "help":
-                    return Result<object>.Ok(null, "Available commands: add, list, find, sort, remove, report, help, exit");
-
-                case "exit":
-                    // UI will handle actual exit; router just returns success
-                    return Result<object>.Ok(null, "exit");
-
-                default:
-                    return Result<object>.Fail($"Unknown command '{commandType}'. Type 'help' for usage.");
+                return commandType switch
+                {
+                    "add" => HandleAdd(tokens),
+                    "list" => HandleList(tokens),
+                    "find" => HandleFind(tokens),
+                    "sort" => HandleSort(tokens),
+                    "remove" => HandleRemove(tokens),
+                    "report" => HandleReport(tokens),
+                    "help" => Result.Ok("Available commands: add, list, find, sort, remove, report, help, exit"),
+                    "exit" => Result.Ok("exit"),
+                    _ => Result.Fail($"Unknown command '{commandType}'. Type 'help' for usage.")
+                };
             }
-
+            catch (Exception ex)
+            {
+                return Result.Fail(ex.Message);
+            }
         }
+
         private Result HandleAdd(string[] tokens)
         {
-            EnsureTokenLength(tokens, 7); // if this throws catch it in the Route
+            EnsureTokenLength(tokens, 7); // throws => caught in Route as unexpected error
+
             var type = tokens[1];
-            if (type.Equals("ebook"))
+
+            if (type.Equals("ebook", StringComparison.OrdinalIgnoreCase))
             {
                 var title = tokens[2];
                 var author = tokens[3];
                 var fileFormat = tokens[5];
-                if (!int.TryParse(tokens[4], out int year))
-                    return Result<object>.Fail(ErrorMessages.InvalidYear);
-                if (!int.TryParse(tokens[6], out int fileSizeMb))
-                    return Result<object>.Fail(ErrorMessages.InvalidFileSize);
 
-                AddEBookCommand addEBookCommand = new(title, author, year, fileFormat, fileSizeMb);
-                AddEBookHandler handler = new(_bookService);
-                return handler.Handle(addEBookCommand);
+                if (!int.TryParse(tokens[4], out int year))
+                    return Result.Fail(ErrorMessages.InvalidYear);
+
+                if (!int.TryParse(tokens[6], out int fileSizeMb))
+                    return Result.Fail(ErrorMessages.InvalidFileSize);
+
+                var command = new AddEBookCommand(title, author, year, fileFormat, fileSizeMb);
+                var handler = new AddEBookHandler(_bookService);
+
+                return handler.Handle(command);
             }
-            else if (type.Equals("physical"))
+
+            if (type.Equals("physical", StringComparison.OrdinalIgnoreCase))
             {
                 var title = tokens[2];
                 var author = tokens[3];
                 var isbn13 = tokens[5];
+
                 if (!int.TryParse(tokens[4], out int year))
-                    return Result<object>.Fail(ErrorMessages.InvalidYear);
+                    return Result.Fail(ErrorMessages.InvalidYear);
 
                 if (!int.TryParse(tokens[6], out int pages))
-                    return Result<object>.Fail(ErrorMessages.InvalidPageNumber);
-                    
-                AddPhysicalBookCommand addPhysicalBookCommand = new(title, author, year, isbn13, pages);
-                AddPhysicalBookHandler handler = new(_bookService);
-                return handler.Handle(addPhysicalBookCommand);
+                    return Result.Fail(ErrorMessages.InvalidPageNumber);
+
+                var command = new AddPhysicalBookCommand(title, author, year, isbn13, pages);
+                var handler = new AddPhysicalBookHandler(_bookService);
+
+                return handler.Handle(command);
             }
-            else throw new ArgumentException(ErrorMessages.IncorrectParameters);
-        }
 
-        private Result<object> HandleReport(string[] tokens)
+            // Type validation is still an expected failure.
+            return Result.Fail(ErrorMessages.IncorrectParameters);
+        }
+        private Result HandleList(string[] tokens)
         {
-            throw new NotImplementedException();
+            var handler = new ListBooksHandler(_bookService);
+            return handler.Handle(new ListBooksCommand());
         }
 
-        private Result<object> HandleRemove(string[] tokens)
+        private Result HandleFind(string[] tokens)
         {
-            throw new NotImplementedException();
+            EnsureTokenLength(tokens, 3);
+            if (Enum.TryParse<FindField>(tokens[1], true, out var strategy))
+            {
+                var handler = new FindBooksHandler(_bookService);
+                return handler.Handle(new FindBooksCommand(strategy, tokens[2]));
+            }
+            return Result.Fail(ErrorMessages.IncorrectParameters);
         }
-
-        private Result<object> HandleSort(string[] tokens)
+        private Result HandleSort(string[] tokens)
         {
-            throw new NotImplementedException();
+            EnsureTokenLength(tokens, 2);
+            if (Enum.TryParse<SortField>(tokens[1], true, out var strategy))
+            {
+                var handler = new SortBooksHandler(_bookService);
+                return handler.Handle(new SortBooksCommand(strategy));
+            }
+            return Result.Fail(ErrorMessages.IncorrectParameters);
         }
-
-        private Result<object> HandleFind(string[] tokens)
+        private Result HandleRemove(string[] tokens)
         {
-            throw new NotImplementedException();
-        }
+            EnsureTokenLength(tokens, 2);
 
-        private Result<object> HandleList(string[] tokens)
+            if (Guid.TryParse(tokens[1], out Guid guid))
+            {
+                var handler = new RemoveBookHandler(_bookService);
+                var command = new RemoveBookCommand(guid);
+                return handler.Handle(command);
+            }
+
+            return Result.Fail(ErrorMessages.IncorrectParameters);
+        }
+        private Result HandleReport(string[] tokens)
         {
-            throw new NotImplementedException();
-        }
+            EnsureTokenLength(tokens, 2);
 
+            if (tokens[1].Equals("catalog", StringComparison.OrdinalIgnoreCase))
+            {
+                var handler = new ReportCatalogHandler(_bookService);
+                return handler.Handle(new ReportCatalogCommand());
+            }
+            else if (tokens[1].Equals("summary", StringComparison.OrdinalIgnoreCase))
+            {
+                var handler = new ReportSummaryHandler(_bookService);
+                return handler.Handle(new ReportSummaryCommand());
+            }
+            return Result.Fail(ErrorMessages.IncorrectParameters);
+        }
         private static void EnsureTokenLength(string[] tokens, int expected)
         {
             if (tokens.Length < expected)
                 throw new Exception(ErrorMessages.InsufficientParameters);
         }
-
     }
 }

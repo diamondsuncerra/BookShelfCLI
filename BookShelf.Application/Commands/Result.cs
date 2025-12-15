@@ -3,8 +3,8 @@ namespace BookShelf.Application.Commands
     public class Result
     {
         public bool IsSuccess { get; }
-        public string Error { get; }
-        public string Message { get; }
+        public string? Error { get; }
+        public string? Message { get; }
 
         protected Result(bool isSuccess, string error, string message)
         {
@@ -12,6 +12,12 @@ namespace BookShelf.Application.Commands
             Error = error;
             Message = message;
         }
+
+        public static Result Ok(string message = "")
+            => new(true, null, message);
+
+        public static Result Fail(string error)
+            => new(false, error, null);
     }
 
     public class Result<T> : Result
@@ -25,10 +31,9 @@ namespace BookShelf.Application.Commands
         }
 
         public static Result<T> Ok(T value, string message = "")
-            => new Result<T>(value, true, null, message);
+            => new(value, true, null, message);
 
         public static Result<T> Fail(string error)
-            => new Result<T>(default!, false, error, null);
+            => new(default!, false, error, null);
     }
-
 }
