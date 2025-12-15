@@ -7,5 +7,6 @@ namespace BookShelf.ConsoleUI.UIMessages
         public const string InvalidFileSize = "Invalid file size. Please provide a number.";
         public const string InvalidYear = "Invalid year. Please provide a number.";
         public const string InvalidPageNumber = "Invalid page number. Please provide a number.";
+        public const string NoCommandGiven = "No command. Type 'help' for usage.";
     }
 }
