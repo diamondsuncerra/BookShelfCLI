@@ -45,7 +45,7 @@ namespace BookShelf.ConsoleUI
                 return commandType switch
                 {
                     "add"    => HandleAdd(tokens),
-                    "list"   => HandleList(tokens),
+                    "list"   => HandleList(),
                     "find"   => HandleFind(tokens),
                     "sort"   => HandleSort(tokens),
                     "remove" => HandleRemove(tokens),
@@ -108,7 +108,7 @@ namespace BookShelf.ConsoleUI
             return Result.Fail(ErrorMessages.IncorrectParameters);
         }
 
-        private Result HandleList(string[] tokens)
+        private Result HandleList()
         {
             var handler = new ListBooksHandler(_bookService);
             return handler.Handle(new ListBooksCommand());
