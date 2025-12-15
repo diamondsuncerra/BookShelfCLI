@@ -1,6 +1,6 @@
 namespace BookShelf.ConsoleUI.UIMessages
 {
-    public class CommandsOrFields
+    public static class CommandsOrFields
     {
         public const string Exit = "exit";
         public const string Ebook = "ebook";
