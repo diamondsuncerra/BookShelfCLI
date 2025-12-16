@@ -57,11 +57,13 @@ namespace BookShelf.Application.Services
             _matchStrategy = field.Equals(FindField.Author) ? new AuthorContainsStrategy() : new TitleContainsStrategy();
 
 
-            IReadOnlyList<Book> result = [];
-            foreach (Book book in books)
+            var result = new List<Book>();
+            foreach (var book in books)
             {
-                _matchStrategy.IsMatch(book, term);
-                _ = result.Append(book);
+                if (_matchStrategy.IsMatch(book, term))
+                {
+                    result.Add(book);
+                }
             }
             return result;
         }
