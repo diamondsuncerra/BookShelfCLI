@@ -16,8 +16,8 @@ namespace BookShelf.Application.Services
         private readonly IBookRepository _bookRepository = repository;
         private readonly ReportTemplate _catalogReport = new CatalogReport();
         private readonly ReportTemplate _summaryReport = new SummaryReport();
-        private ISortStrategy _sortStrategy;
-        private IMatchStrategy _matchStrategy;
+        private ISortStrategy? _sortStrategy;
+        private IMatchStrategy? _matchStrategy;
         public Guid AddEBook(string title, string author, int year, string fileFormat, decimal fileSizeMb)
         {
             Book newBook = _bookFactory.CreateEBook(title, author, year, fileFormat, fileSizeMb);
