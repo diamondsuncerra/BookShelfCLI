@@ -49,6 +49,13 @@ namespace BookShelf.ConsoleUI
                         Console.WriteLine("GoodBye!");
                         break;
                     }
+                    try {
+                    Console.WriteLine(((Result<object>)result).Value);
+                    } catch (InvalidCastException ex)
+                    {
+                        
+                    } 
+
                     Console.WriteLine(result.Message);
                 }
 

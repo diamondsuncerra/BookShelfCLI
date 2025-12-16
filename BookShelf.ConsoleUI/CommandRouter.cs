@@ -1,4 +1,5 @@
 ﻿using System.Globalization;
+using System.IO.Pipelines;
 using System.Text;
 using BookShelf.Application;
 using BookShelf.Application.Commands;
@@ -13,7 +14,7 @@ namespace BookShelf.ConsoleUI
     {
         private readonly IBookService _bookService = bookService;
 
-        public Result Route(string input)
+        public Result<object> Route(string input)
         {
             try
             {
@@ -37,20 +38,20 @@ namespace BookShelf.ConsoleUI
                     "report" => HandleReport(tokens),
                     "help" => Result.Ok(UIHelperMessages.AvailableCommands),
                     "exit" => Result.Ok(CommandsOrFields.Exit),
-                    _ => Result.Fail($"Unknown command '{commandType}'. Type 'help' for usage.")
+                    _ => Result<object>.Fail($"Unknown command '{commandType}'. Type 'help' for usage.")
                 };
             }
             catch
             {
-                return Result.Fail(ErrorMessages.UnexpectedError);
+                return Result<object>.Fail(ErrorMessages.UnexpectedError);
             }
         }
 
 
-        private Result HandleAdd(string[] tokens)
+        private Result<Guid> HandleAdd(string[] tokens)
         {
             if (tokens.Length < 7)
-                return Result.Fail(ErrorMessages.InsufficientParameters);
+                return Result<Guid>.Fail(ErrorMessages.InsufficientParameters);
 
             var type = tokens[1];
 
@@ -69,7 +70,6 @@ namespace BookShelf.ConsoleUI
 
                 var command = new AddEBookCommand(title, author, year, fileFormat, fileSizeMb);
                 var handler = new AddEBookHandler(_bookService);
-
                 return handler.Handle(command);
             }
 
@@ -92,13 +92,12 @@ namespace BookShelf.ConsoleUI
             }
             return Result.Fail(ErrorMessages.IncorrectParameters);
         }
-
-        private Result HandleList()
+        private Result<string> HandleList()
         {
             var handler = new ListBooksHandler(_bookService);
             return handler.Handle(new ListBooksCommand());
         }
-        private Result HandleFind(string[] tokens)
+        private Result<string> HandleFind(string[] tokens)
         {
             if (tokens.Length < 3)
                 return Result.Fail(ErrorMessages.InsufficientParameters);
@@ -116,7 +115,7 @@ namespace BookShelf.ConsoleUI
 
             return handler.Handle(command);
         }
-        private Result HandleSort(string[] tokens)
+        private Result<string> HandleSort(string[] tokens)
         {
             if (tokens.Length < 2)
                 return Result.Fail(ErrorMessages.InsufficientParameters);
@@ -129,7 +128,7 @@ namespace BookShelf.ConsoleUI
             }
             return Result.Fail(ErrorMessages.IncorrectParameters);
         }
-        private Result HandleRemove(string[] tokens)
+        private Result<string> HandleRemove(string[] tokens)
         {
             if (tokens.Length < 2)
                 return Result.Fail(ErrorMessages.InsufficientParameters);
@@ -142,8 +141,7 @@ namespace BookShelf.ConsoleUI
             }
             return Result.Fail(ErrorMessages.IncorrectParameters);
         }
-
-        private Result HandleReport(string[] tokens)
+        private Result<string> HandleReport(string[] tokens)
         {
 
             if (tokens.Length < 2)
