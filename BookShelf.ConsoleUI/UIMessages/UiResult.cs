@@ -16,12 +16,12 @@ namespace BookShelf.ConsoleUI.UIMessages
         }
 
         public static UiResult Ok(string? output = null)
-            => new UiResult(true, output, null, false);
+            => new(true, output, null, false);
 
         public static UiResult Fail(string error)
-            => new UiResult(false, null, error, false);
+            => new(false, null, error, false);
 
         public static UiResult Exit(string? farewell = "GoodBye!")
-            => new UiResult(true, farewell, null, true);
+            => new(true, farewell, null, true);
     }
 }

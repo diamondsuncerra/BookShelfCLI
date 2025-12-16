@@ -49,14 +49,13 @@ namespace BookShelf.Application.Services
         public IReadOnlyList<Book> Find(FindField field, string term)
         {
             var books = _bookRepository.List();
-            if (field.Equals(FindField.Author))
+            if (!Enum.IsDefined(typeof(FindField), field))
             {
-                _matchStrategy = new AuthorContainsStrategy();
+                throw new ArgumentException("Unsupported field type for search.");
             }
-            else
-            {
-                _matchStrategy = new TitleContainsStrategy();
-            } // i should throw maybe here?
+
+            _matchStrategy = field.Equals(FindField.Author) ? new AuthorContainsStrategy() : new TitleContainsStrategy();
+
 
             IReadOnlyList<Book> result = [];
             foreach (Book book in books)
@@ -80,18 +79,13 @@ namespace BookShelf.Application.Services
         public IReadOnlyList<Book> Sort(SortField strategy)
         {
             var books = _bookRepository.List();
-            if (strategy.Equals(SortField.Author))
+            _sortStrategy = strategy switch
             {
-                _sortStrategy = new SortByAuthorStrategy();
-            }
-            else if (strategy.Equals(SortField.Title))
-            {
-                _sortStrategy = new SortByTitleStrategy();
-            }
-            else
-            {
-                _sortStrategy = new SortByYearStrategy();
-            }
+                SortField.Author => new SortByAuthorStrategy(),
+                SortField.Title => new SortByTitleStrategy(),
+                SortField.Year => new SortByYearStrategy(),
+                _ => throw new ArgumentException("Unsupported sort strategy.")
+            };
 
             IReadOnlyList<Book> result = _sortStrategy.Sort(books);
             return result;

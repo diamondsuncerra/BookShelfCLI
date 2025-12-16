@@ -31,7 +31,7 @@ namespace BookShelf.ConsoleUI
                 if (input is null)
                     break;
 
-                Result result = router.Route(input);
+                var result = router.Route(input);
 
                 if (!result.IsSuccess)
                     Console.WriteLine(result.Error);
