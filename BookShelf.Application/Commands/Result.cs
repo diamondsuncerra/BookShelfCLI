@@ -1,39 +1,24 @@
 namespace BookShelf.Application.Commands
 {
-    public class Result
+    public class Result<T>
     {
         public bool IsSuccess { get; }
         public string? Error { get; }
         public string? Message { get; }
+        public T? Value { get; }
 
-        protected Result(bool isSuccess, string error, string message)
+        private Result(bool isSuccess, T? value, string? error, string? message)
         {
             IsSuccess = isSuccess;
+            Value = value;
             Error = error;
             Message = message;
         }
 
-        public static Result Ok(string message = "")
-            => new(true, null, message);
-
-        public static Result Fail(string error)
-            => new(false, error, null);
-    }
-
-    public class Result<T> : Result
-    {
-        public T Value { get; }
-
-        private Result(T value, bool isSuccess, string error, string message)
-            : base(isSuccess, error, message)
-        {
-            Value = value;
-        }
-
         public static Result<T> Ok(T value, string message = "")
-            => new(value, true, null, message);
+            => new(true, value, null, message);
 
         public static Result<T> Fail(string error)
-            => new(default!, false, error, null);
+            => new(false, default, error, null);
     }
 }

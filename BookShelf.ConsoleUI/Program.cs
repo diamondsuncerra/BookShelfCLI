@@ -31,28 +31,18 @@ namespace BookShelf.ConsoleUI
                 if (input is null)
                     break;
 
-                Result result = router.Route(input);
+                var result = router.Route(input);
 
                 if (!result.IsSuccess)
-                {
-                    Console.ForegroundColor = ConsoleColor.Red;
                     Console.WriteLine(result.Error);
-                    Console.ResetColor();
-                    continue;
-                }
+                else
+                    Console.WriteLine(result.Output);
 
-                if (!string.IsNullOrWhiteSpace(result.Message))
-                {
-                    if (//string.Equals(result.Message, CommandsOrFields.Exit, StringComparison.OrdinalIgnoreCase) ||
-                        string.Equals(result.Message, "exit", StringComparison.OrdinalIgnoreCase))
-                    {
-                        Console.WriteLine("GoodBye!");
-                        break;
-                    }
-                    Console.WriteLine(result.Message);
-                }
-
+                if (result.ShouldExit)
+                    break;
             }
+
         }
     }
 }
+
