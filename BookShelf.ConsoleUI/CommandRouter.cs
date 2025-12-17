@@ -260,7 +260,7 @@ namespace BookShelf.ConsoleUI
 
             foreach (var book in books)
             {
-                builder.AppendLine(new BookDisplay(book).Display());
+                builder.AppendLine(new FeaturedBookDecorator(new BookDisplay(book)).Display());
             }
 
             return builder.ToString();

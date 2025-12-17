@@ -2,9 +2,10 @@ using BookShelf.Domain.Books;
 
 namespace BookShelf.ConsoleUI.Decorators
 {
-    public class RecommendedBookDecorator(Book book) : IBookDisplay
+    public class RecommendBookDecorator(IBookDisplay bookDisplay) : IBookDisplay
     {
-        private readonly Book _book = book;
-        public string Display() =>  $"<RECOMMENDED> \"{_book.Title}\" by {_book.Author} ({_book.Year})";
+        private readonly IBookDisplay _bookDisplay = bookDisplay;
+        public string Display() => $"<Recommended>" + _bookDisplay.Display();
     }
+
 }
