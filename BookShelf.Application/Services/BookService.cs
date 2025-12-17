@@ -11,7 +11,7 @@ using BookShelf.Domain.Strategies.Sort;
 
 namespace BookShelf.Application.Services
 {
-    public class BookService(IBookFactory factory, IBookRepository repository) : IBookService
+    public class BookService(IBookFactory factory, IBookRepository repository, IBookEventPublisher bookEventPublisher) : IBookService
     {
         private readonly IBookFactory _bookFactory = factory;
         private readonly IBookRepository _bookRepository = repository;
@@ -19,11 +19,13 @@ namespace BookShelf.Application.Services
         private readonly ReportTemplate _summaryReport = new SummaryReport();
         private ISortStrategy? _sortStrategy;
         private IMatchStrategy? _matchStrategy;
+        private IBookEventPublisher _publisher = bookEventPublisher;
         public Guid AddEBook(string title, string author, int year, string fileFormat, decimal fileSizeMb)
         {
             Book newBook = _bookFactory.CreateEBook(title, author, year, fileFormat, fileSizeMb);
             _bookRepository.Add(newBook);
             IBookEvent addEvent = new BookAddedEvent(newBook.Id, DateTime.UtcNow);
+            _publisher.Publish(addEvent);
             return newBook.Id;
             // handler catches the exceptions TODO
         }
@@ -33,6 +35,8 @@ namespace BookShelf.Application.Services
             Book newBook = _bookFactory.CreatePhysical(title, author, year, isbn13, pages);
             // TODO create maybe an object for all of these params? DTOS?? 
             _bookRepository.Add(newBook);
+            IBookEvent addEvent = new BookAddedEvent(newBook.Id, DateTime.UtcNow);
+            _publisher.Publish(addEvent);
             return newBook.Id;
         }
 
@@ -77,7 +81,13 @@ namespace BookShelf.Application.Services
 
         public bool Remove(Guid id)
         {
-            return _bookRepository.Remove(id);
+            var result = _bookRepository.Remove(id);
+            if (result)
+            {
+                IBookEvent addEvent = new BookRemovedEvent(id, DateTime.UtcNow);
+                _publisher.Publish(addEvent);
+            }
+            return result;
         }
 
         public IReadOnlyList<Book> Sort(SortField strategy)
