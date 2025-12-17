@@ -1,5 +1,6 @@
 using System.Text;
 using BookShelf.Application.Commands.Enums;
+using BookShelf.Application.Events;
 using BookShelf.Domain.Books;
 using BookShelf.Domain.Factories;
 using BookShelf.Domain.Reports;
@@ -22,6 +23,7 @@ namespace BookShelf.Application.Services
         {
             Book newBook = _bookFactory.CreateEBook(title, author, year, fileFormat, fileSizeMb);
             _bookRepository.Add(newBook);
+            IBookEvent addEvent = new BookAddedEvent(newBook.Id, DateTime.UtcNow);
             return newBook.Id;
             // handler catches the exceptions TODO
         }
