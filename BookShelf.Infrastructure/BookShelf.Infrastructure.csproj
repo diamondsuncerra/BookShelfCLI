@@ -2,6 +2,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\BookShelf.Domain\BookShelf.Domain.csproj" />
+    <ProjectReference Include="..\BookShelf.Application\BookShelf.Application.csproj" />
   </ItemGroup>
 
   <PropertyGroup>

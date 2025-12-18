@@ -8,6 +8,9 @@ using BookShelf.Application;
 using BookShelf.Infrastructure.Factory;
 using BookShelf.Infrastructure.Repository;
 using BookShelf.Application.Services;
+using BookShelf.Application.Events;
+using BookShelf.Infrastructure.Events;
+using BookShelf.ConsoleUI.Observer;
 
 namespace BookShelf.ConsoleUI
 {
@@ -17,7 +20,10 @@ namespace BookShelf.ConsoleUI
         {
             IBookFactory bookFactory = new BookFactory();
             IBookRepository bookRepository = new InMemoryBookRepository();
-            IBookService bookService = new BookService(bookFactory, bookRepository);
+            IBookEventPublisher bookEventPublisher = new Publisher();
+            IBookEventObserver consoleLoggerObserver = new ConsoleLoggerObserver();
+            bookEventPublisher.Attach(consoleLoggerObserver);
+            IBookService bookService = new BookService(bookFactory, bookRepository, bookEventPublisher);
 
             var router = new CommandRouter(bookService);
             Console.WriteLine("BookShelf CLI");
