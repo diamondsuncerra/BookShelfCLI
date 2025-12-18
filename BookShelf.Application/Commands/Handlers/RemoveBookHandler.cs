@@ -1,8 +1,9 @@
+using BookShelf.Application.Commands.Abstract;
 using BookShelf.Application.Commands.Models;
 
 namespace BookShelf.Application.Commands.Handlers
 {
-    public class RemoveBookHandler(IBookService bookService) :  ICommandHandler<RemoveBookCommand, Result<bool>>
+    public class RemoveBookHandler(IBookService bookService) :  IUndoableCommandHandler<RemoveBookCommand, Result<bool>>
     {
         private readonly IBookService _bookService = bookService;
 
@@ -11,6 +12,11 @@ namespace BookShelf.Application.Commands.Handlers
             bool result = _bookService.Remove(command.Id);
             return Result<bool>.Ok(result, "Book removed successfully.");
             // add error handling later!
+        }
+
+        public void Undo()
+        {
+            throw new NotImplementedException();
         }
     }
 }

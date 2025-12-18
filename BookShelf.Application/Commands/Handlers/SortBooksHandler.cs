@@ -1,3 +1,4 @@
+using BookShelf.Application.Commands.Abstract;
 using BookShelf.Application.Commands.Models;
 using BookShelf.Domain.Books;
 

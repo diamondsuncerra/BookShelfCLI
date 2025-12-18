@@ -1,8 +1,9 @@
+using BookShelf.Application.Commands.Abstract;
 using BookShelf.Application.Commands.Models;
 
 namespace BookShelf.Application.Commands.Handlers
 {
-    public class AddEBookHandler(IBookService bookService) : ICommandHandler<AddEBookCommand, Result<Guid>>
+    public class AddEBookHandler(IBookService bookService) : IUndoableCommandHandler<AddEBookCommand, Result<Guid>>
     {
         private readonly IBookService _bookService = bookService;
 
@@ -17,5 +18,9 @@ namespace BookShelf.Application.Commands.Handlers
             return Result<Guid>.Ok(id, "Ebook added.");
         }
 
+        public void Undo()
+        {
+            throw new NotImplementedException();
+        }
     }
 }

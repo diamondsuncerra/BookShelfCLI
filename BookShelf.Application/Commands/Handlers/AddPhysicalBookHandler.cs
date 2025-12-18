@@ -1,8 +1,9 @@
+using BookShelf.Application.Commands.Abstract;
 using BookShelf.Application.Commands.Models;
 
 namespace BookShelf.Application.Commands.Handlers
 {
-    public class AddPhysicalBookHandler(IBookService bookService) : ICommandHandler<AddPhysicalBookCommand, Result<Guid>>
+    public class AddPhysicalBookHandler(IBookService bookService) : IUndoableCommandHandler<AddPhysicalBookCommand, Result<Guid>>
     {
         private readonly IBookService _bookService = bookService;
 
@@ -17,6 +18,11 @@ namespace BookShelf.Application.Commands.Handlers
                 command.Pages
             );
             return Result<Guid>.Ok(id, "Physical book added.");
+        }
+
+        public void Undo()
+        {
+            throw new NotImplementedException();
         }
     }
 }

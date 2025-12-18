@@ -1,7 +1,3 @@
-using System;
-using BookShelf.ConsoleUI;
-using BookShelf.ConsoleUI.UIMessages;
-using BookShelf.Application.Commands;
 using BookShelf.Domain.Factories;
 using BookShelf.Domain.Repositories;
 using BookShelf.Application;

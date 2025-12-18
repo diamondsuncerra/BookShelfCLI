@@ -38,6 +38,7 @@ namespace BookShelf.ConsoleUI
                     "sort"   => HandleSort(tokens),
                     "remove" => HandleRemove(tokens),
                     "report" => HandleReport(tokens),
+                    "undo"   => HandleUndo(),
                     "help"   => UiResult.Ok(UIHelperMessages.AvailableCommands),
                     "exit"   => UiResult.Exit(),
                     _        => UiResult.Fail($"Unknown command '{commandName}'. Type 'help' for usage.")
@@ -47,6 +48,11 @@ namespace BookShelf.ConsoleUI
             {
                 return UiResult.Fail(ErrorMessages.UnexpectedError);
             }
+        }
+
+        private UiResult HandleUndo()
+        {
+            
         }
 
         private UiResult HandleAdd(string[] tokens)
