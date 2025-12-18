@@ -17,10 +17,9 @@ namespace BookShelf.Application.Commands.Handlers
                         command.FileSizeMb);
             return Result<Guid>.Ok(id, "Ebook added.");
         }
-
         public void Undo()
         {
-            throw new NotImplementedException();
+        
         }
     }
 }

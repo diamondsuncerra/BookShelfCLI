@@ -7,6 +7,7 @@ using BookShelf.Application.Services;
 using BookShelf.Application.Events;
 using BookShelf.Infrastructure.Events;
 using BookShelf.ConsoleUI.Observer;
+using BookShelf.Application.Commands.Abstract;
 
 namespace BookShelf.ConsoleUI
 {
@@ -18,10 +19,11 @@ namespace BookShelf.ConsoleUI
             IBookRepository bookRepository = new InMemoryBookRepository();
             IBookEventPublisher bookEventPublisher = new Publisher();
             IBookEventObserver consoleLoggerObserver = new ConsoleLoggerObserver();
+            ICommandHistory commandHistory = new CommandHistory();
             bookEventPublisher.Attach(consoleLoggerObserver);
             IBookService bookService = new BookService(bookFactory, bookRepository, bookEventPublisher);
 
-            var router = new CommandRouter(bookService);
+            var router = new CommandRouter(bookService, commandHistory);
             Console.WriteLine("BookShelf CLI");
             Console.WriteLine("Type 'help' for usage. Type 'exit' to quit.");
             Console.WriteLine();

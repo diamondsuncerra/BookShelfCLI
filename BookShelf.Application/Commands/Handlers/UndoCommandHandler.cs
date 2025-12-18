@@ -8,7 +8,7 @@ namespace BookShelf.Application.Commands.Handlers
         private readonly IBookService _bookService = bookService;
         public Result<bool> Handle(UndoCommand command)
         {
-            throw new NotImplementedException();
+            
         }
     }
 }
