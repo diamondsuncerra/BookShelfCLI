@@ -6,6 +6,7 @@ using BookShelf.Application.Commands;
 using BookShelf.Application.Commands.Enums;
 using BookShelf.Application.Commands.Handlers;
 using BookShelf.Application.Commands.Models;
+using BookShelf.ConsoleUI.Decorators;
 using BookShelf.ConsoleUI.UIMessages;
 using BookShelf.Domain.Books;
 
@@ -259,7 +260,7 @@ namespace BookShelf.ConsoleUI
 
             foreach (var book in books)
             {
-                builder.AppendLine($"{book.Id} - \"{book.Title}\" by {book.Author} ({book.Year})");
+                builder.AppendLine(new FeaturedBookDecorator(new BookDisplay(book)).Display());
             }
 
             return builder.ToString();
