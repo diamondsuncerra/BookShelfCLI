@@ -3,6 +3,7 @@ using System.Globalization;
 using System.Text;
 using BookShelf.Application;
 using BookShelf.Application.Commands;
+using BookShelf.Application.Commands.Abstract;
 using BookShelf.Application.Commands.Enums;
 using BookShelf.Application.Commands.Handlers;
 using BookShelf.Application.Commands.Models;
@@ -12,9 +13,10 @@ using BookShelf.Domain.Books;
 
 namespace BookShelf.ConsoleUI
 {
-    public class CommandRouter(IBookService bookService)
+    public class CommandRouter(IBookService bookService, ICommandHistory commandHistory)
     {
         private readonly IBookService _bookService = bookService;
+        private readonly ICommandHistory _commandHistory = commandHistory;
 
         public UiResult Route(string input)
         {
@@ -32,21 +34,31 @@ namespace BookShelf.ConsoleUI
 
                 return commandName switch
                 {
-                    "add"    => HandleAdd(tokens),
-                    "list"   => HandleList(),
-                    "find"   => HandleFind(tokens),
-                    "sort"   => HandleSort(tokens),
+                    "add" => HandleAdd(tokens),
+                    "list" => HandleList(),
+                    "find" => HandleFind(tokens),
+                    "sort" => HandleSort(tokens),
                     "remove" => HandleRemove(tokens),
                     "report" => HandleReport(tokens),
-                    "help"   => UiResult.Ok(UIHelperMessages.AvailableCommands),
-                    "exit"   => UiResult.Exit(),
-                    _        => UiResult.Fail($"Unknown command '{commandName}'. Type 'help' for usage.")
+                    "undo" => HandleUndo(),
+                    "help" => UiResult.Ok(UIHelperMessages.AvailableCommands),
+                    "exit" => UiResult.Exit(),
+                    _ => UiResult.Fail($"Unknown command '{commandName}'. Type 'help' for usage.")
                 };
             }
             catch
             {
                 return UiResult.Fail(ErrorMessages.UnexpectedError);
             }
+        }
+
+        private UiResult HandleUndo()
+        {
+            var undoable = _commandHistory.Pop();
+            if (undoable is null)
+                return UiResult.Fail("Nothing to undo.");
+            undoable.Undo();
+            return UiResult.Ok("Previous undoable operation was retracted.");
         }
 
         private UiResult HandleAdd(string[] tokens)
@@ -58,8 +70,8 @@ namespace BookShelf.ConsoleUI
 
             if (bookType.Equals(CommandsOrFields.Ebook, StringComparison.OrdinalIgnoreCase))
             {
-                var title      = tokens[2];
-                var author     = tokens[3];
+                var title = tokens[2];
+                var author = tokens[3];
                 var fileFormat = tokens[5];
 
                 if (!int.TryParse(tokens[4], out int year))
@@ -70,18 +82,22 @@ namespace BookShelf.ConsoleUI
                     return UiResult.Fail(ErrorMessages.InvalidFileSize);
 
                 var command = new AddEBookCommand(title, author, year, fileFormat, fileSizeMb);
+                // intrebare -> e mai ok aici sau ca fields. GPT a zis ca e mai ok aici pt ca 
+                // sunt mici si nu e mare pb de performanta?
                 var handler = new AddEBookHandler(_bookService);
-                var result  = handler.Handle(command); // Result<Guid>
+                var result = handler.Handle(command); // Result<Guid>
 
                 if (!result.IsSuccess)
                     return UiResult.Fail(result.Error ?? ErrorMessages.UnexpectedError);
 
+                _commandHistory.Push(handler);
                 return UiResult.Ok($"Ebook added with Id: {result.Value}");
+
             }
 
             if (bookType.Equals(CommandsOrFields.Physical, StringComparison.OrdinalIgnoreCase))
             {
-                var title  = tokens[2];
+                var title = tokens[2];
                 var author = tokens[3];
                 var isbn13 = tokens[5];
 
@@ -93,11 +109,11 @@ namespace BookShelf.ConsoleUI
 
                 var command = new AddPhysicalBookCommand(title, author, year, isbn13, pages);
                 var handler = new AddPhysicalBookHandler(_bookService);
-                var result  = handler.Handle(command); // Result<Guid>
+                var result = handler.Handle(command); // Result<Guid>
 
                 if (!result.IsSuccess)
                     return UiResult.Fail(result.Error ?? ErrorMessages.UnexpectedError);
-
+                _commandHistory.Push(handler);
                 return UiResult.Ok($"Physical book added with Id: {result.Value}");
             }
 
@@ -107,7 +123,7 @@ namespace BookShelf.ConsoleUI
         private UiResult HandleList()
         {
             var handler = new ListBooksHandler(_bookService);
-            var result  = handler.Handle(new ListBooksCommand()); // Result<IReadOnlyList<Book>>
+            var result = handler.Handle(new ListBooksCommand()); // Result<IReadOnlyList<Book>>
 
             if (!result.IsSuccess)
                 return UiResult.Fail(result.Error ?? ErrorMessages.UnexpectedError);
@@ -131,7 +147,7 @@ namespace BookShelf.ConsoleUI
 
             var handler = new FindBooksHandler(_bookService);
             var command = new FindBooksCommand(field, searchTerm);
-            var result  = handler.Handle(command); // Result<IReadOnlyList<Book>>
+            var result = handler.Handle(command); // Result<IReadOnlyList<Book>>
 
             if (!result.IsSuccess)
                 return UiResult.Fail(result.Error ?? ErrorMessages.UnexpectedError);
@@ -150,7 +166,7 @@ namespace BookShelf.ConsoleUI
 
             var handler = new SortBooksHandler(_bookService);
             var command = new SortBooksCommand(sortField);
-            var result  = handler.Handle(command); // Result<IReadOnlyList<Book>>
+            var result = handler.Handle(command); // Result<IReadOnlyList<Book>>
 
             if (!result.IsSuccess)
                 return UiResult.Fail(result.Error ?? ErrorMessages.UnexpectedError);
@@ -169,7 +185,7 @@ namespace BookShelf.ConsoleUI
 
             var handler = new RemoveBookHandler(_bookService);
             var command = new RemoveBookCommand(bookId);
-            var result  = handler.Handle(command); // Result<bool>
+            var result = handler.Handle(command); // Result<bool>
 
             if (!result.IsSuccess)
                 return UiResult.Fail(result.Error ?? ErrorMessages.UnexpectedError);
@@ -180,7 +196,8 @@ namespace BookShelf.ConsoleUI
             var message = string.IsNullOrWhiteSpace(result.Message)
                 ? "Book removed successfully."
                 : result.Message;
-
+                
+            _commandHistory.Push(handler);
             return UiResult.Ok(message);
         }
 
@@ -195,7 +212,7 @@ namespace BookShelf.ConsoleUI
             if (reportType == ReportType.Catalog)
             {
                 var handler = new ReportCatalogHandler(_bookService);
-                var result  = handler.Handle(new ReportCatalogCommand()); // Result<string>
+                var result = handler.Handle(new ReportCatalogCommand()); // Result<string>
 
                 if (!result.IsSuccess)
                     return UiResult.Fail(result.Error ?? ErrorMessages.UnexpectedError);
@@ -206,7 +223,7 @@ namespace BookShelf.ConsoleUI
             if (reportType == ReportType.Summary)
             {
                 var handler = new ReportSummaryHandler(_bookService);
-                var result  = handler.Handle(new ReportSummaryCommand()); // Result<string>
+                var result = handler.Handle(new ReportSummaryCommand()); // Result<string>
 
                 if (!result.IsSuccess)
                     return UiResult.Fail(result.Error ?? ErrorMessages.UnexpectedError);
@@ -219,7 +236,7 @@ namespace BookShelf.ConsoleUI
 
         private static string[] Tokenize(string input)
         {
-            var tokens  = new List<string>();
+            var tokens = new List<string>();
             var current = new StringBuilder();
             var inQuotes = false;
 

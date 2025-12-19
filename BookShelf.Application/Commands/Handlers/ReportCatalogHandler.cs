@@ -1,3 +1,4 @@
+using BookShelf.Application.Commands.Abstract;
 using BookShelf.Application.Commands.Models;
 
 namespace BookShelf.Application.Commands.Handlers
