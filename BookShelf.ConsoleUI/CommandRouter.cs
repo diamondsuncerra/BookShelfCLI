@@ -54,14 +54,11 @@ namespace BookShelf.ConsoleUI
 
         private UiResult HandleUndo()
         {
-            var commandHandler = _commandHistory.Pop();
-            var command = new UndoCommand();
-            var handler = new UndoCommandHandler(_bookService);
-            var result = handler.Handle(command);
-            if (!result.IsSuccess)
-                return UiResult.Fail(result.Error ?? ErrorMessages.UnexpectedError);
-
-            return UiResult.Ok($"Previous undoable operation was retracted.");
+            var undoable = _commandHistory.Pop();
+            if (undoable is null)
+                return UiResult.Fail("Nothing to undo.");
+            undoable.Undo();
+            return UiResult.Ok("Previous undoable operation was retracted.");
         }
 
         private UiResult HandleAdd(string[] tokens)
@@ -93,6 +90,7 @@ namespace BookShelf.ConsoleUI
                 if (!result.IsSuccess)
                     return UiResult.Fail(result.Error ?? ErrorMessages.UnexpectedError);
 
+                _commandHistory.Push(handler);
                 return UiResult.Ok($"Ebook added with Id: {result.Value}");
 
             }
@@ -115,7 +113,7 @@ namespace BookShelf.ConsoleUI
 
                 if (!result.IsSuccess)
                     return UiResult.Fail(result.Error ?? ErrorMessages.UnexpectedError);
-
+                _commandHistory.Push(handler);
                 return UiResult.Ok($"Physical book added with Id: {result.Value}");
             }
 
@@ -198,7 +196,8 @@ namespace BookShelf.ConsoleUI
             var message = string.IsNullOrWhiteSpace(result.Message)
                 ? "Book removed successfully."
                 : result.Message;
-
+                
+            _commandHistory.Push(handler);
             return UiResult.Ok(message);
         }
 

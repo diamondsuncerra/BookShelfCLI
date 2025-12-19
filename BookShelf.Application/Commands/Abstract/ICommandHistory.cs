@@ -1,8 +1,6 @@
-namespace BookShelf.Application.Commands.Abstract
+using BookShelf.Application.Commands.Abstract;
+public interface ICommandHistory
 {
-    public interface ICommandHistory
-    {
-        void Push(IUndoableCommandHandler<object, object> handler); // or non-generic base
-        IUndoableCommandHandler<object, object>? Pop();
-    }
+    void Push(IUndoable command);
+     IUndoable? Pop();
 }

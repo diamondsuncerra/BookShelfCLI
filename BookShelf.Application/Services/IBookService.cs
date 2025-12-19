@@ -12,6 +12,8 @@ namespace BookShelf.Application
         string BuildCatalogReport();
         Guid AddEBook(string title, string author, int year, string fileFormat, decimal fileSizeMb);
         IReadOnlyList<Book> Find(FindField field, string term);
-        
+        Book? Get(Guid id);
+        void Restore(Book book);
+
     }
 }

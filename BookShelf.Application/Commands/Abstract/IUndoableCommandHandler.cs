@@ -1,7 +1,6 @@
-namespace BookShelf.Application.Commands.Abstract
+using BookShelf.Application.Commands.Abstract;
+
+public interface IUndoableCommandHandler<TCommand, TResult> 
+    : ICommandHandler<TCommand, TResult>, IUndoable
 {
-    public interface IUndoableCommandHandler<TCommand, TResult> : ICommandHandler<TCommand, TResult>
-    {
-        void Undo();
-    }
 }

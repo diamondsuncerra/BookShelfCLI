@@ -4,13 +4,16 @@ namespace BookShelf.ConsoleUI
 {
     public class CommandHistory : ICommandHistory
     {
-        private readonly Stack<IUndoableCommandHandler<object, object>> _stack = new();
+        private readonly Stack<IUndoable> _history = new();
 
-        public void Push(IUndoableCommandHandler<object, object> handler)
-            => _stack.Push(handler);
+        public void Push(IUndoable command)
+        {
+            if (command is not null) _history.Push(command);
+        }
 
-        public IUndoableCommandHandler<object, object>? Pop()
-            => _stack.Count > 0 ? _stack.Pop() : null;
-
+        public IUndoable? Pop()
+        {
+            return _history.Count == 0 ? null : _history.Pop();
+        }
     }
 }

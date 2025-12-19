@@ -6,10 +6,10 @@ namespace BookShelf.Application.Commands.Handlers
     public class AddPhysicalBookHandler(IBookService bookService) : IUndoableCommandHandler<AddPhysicalBookCommand, Result<Guid>>
     {
         private readonly IBookService _bookService = bookService;
-
+        private Guid? _addedId;
         public Result<Guid> Handle(AddPhysicalBookCommand command)
         {
-            Guid id = _bookService.AddPhysical( 
+            Guid id = _bookService.AddPhysical(
                 // to avoid coupling bookservice to the commands
                 command.Title,
                 command.Author,
@@ -17,12 +17,14 @@ namespace BookShelf.Application.Commands.Handlers
                 command.Isbn13,
                 command.Pages
             );
+            _addedId = id;
             return Result<Guid>.Ok(id, "Physical book added.");
         }
-
         public void Undo()
         {
-            throw new NotImplementedException();
+            if (_addedId is null) return;
+            _bookService.Remove(_addedId.Value);
+            _addedId = null;
         }
     }
 }
