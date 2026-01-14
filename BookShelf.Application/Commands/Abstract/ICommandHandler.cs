@@ -1,4 +1,4 @@
-namespace BookShelf.Application.Commands
+namespace BookShelf.Application.Commands.Abstract
 {
     public interface ICommandHandler<TCommand, TResult>
     {

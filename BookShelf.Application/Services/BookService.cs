@@ -104,5 +104,13 @@ namespace BookShelf.Application.Services
             IReadOnlyList<Book> result = _sortStrategy.Sort(books);
             return result;
         }
+        public Book? Get(Guid id) => _bookRepository.Get(id);
+
+        public void Restore(Book book)
+        {
+            _bookRepository.Add(book);
+            _publisher.Publish(new BookAddedEvent(book.Id, DateTime.UtcNow));
+        }
+
     }
 }
